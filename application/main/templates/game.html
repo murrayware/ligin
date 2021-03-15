@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+     <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+</head>
+<body>
+<!--     <h2>game: {{game.game_id}}</h2>
+<p>Player 1: {{player1}}</p>
+<p>Player 2: {{player2}}</p>
+<p>Deck: {{deck}}</p>
+<p>you are {{player_name}}</p> -->
+<p id='deck'></p>
+<p id='player1_cards'></p>
+<p id='player2_cards'></p>
+
+            <script type="text/javascript" charset="utf-8">
+            var socket;
+            $(document).ready(function(){
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/game/{{game_id}}');
+                socket.on('connect', function() {
+                    console.log('connected')
+                    socket.emit('get_game_data', {'game_id':{{game_id}}});
+                });
+                socket.on('joined_game', function(data){
+                    const deck = document.getElementById('deck');
+                    const player1_cards = document.getElementById('player1_cards');
+                    const player2_cards = document.getElementById('player2_cards');
+                    player1_cards.innerHTML = data.player1_cards;
+                    player2_cards.innerHTML = data.player2_cards;
+                    deck.innerHTML = data.deck;
+                    console.log('joined_game',data.deck)
+                    // socket.emit('/game/<id>',{'id':data.id})
+                });
+            });
+
+        </script>
+</body>
+</html>

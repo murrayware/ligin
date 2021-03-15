@@ -6,9 +6,13 @@ from flask_login import UserMixin
 from flask import current_app
 
 
-class User(db.Model):
+
+
+
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
+    username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), unique=True, nullable=False)
-    player1_id = db.relationship('Game', backref = 'player1', lazy = 'dynamic', foreign_keys = 'Game.player1_id')
-    player2_id = db.relationship('Game', backref = 'player2', lazy = 'dynamic', foreign_keys = 'Game.player2_id')
+def get_user(ident):
+  return User.query.get(int(ident))

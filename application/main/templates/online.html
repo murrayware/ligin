@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html>
+<head>
+{{ JSGlue.include() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online</title>
+    <style type="text/css">
+        ul {
+    list-style-type: none;
+    display: inline;
+}
+        li {
+    display: inline;
+}
+    </style>
+    <style type="text/css">
+        .playingCard{
+            width:11vw;
+        }
+
+    @media only screen and (max-width: 600px){
+        .playingCard{
+            width:10vw;
+        }
+    }
+        @media only screen and (min-width: 770px){
+        .playingCard{
+            width:9vw;
+        }
+        .playingCard_container{
+            flex: 0 0 8.0%!important;
+            max-width: 8.0%!important;
+        }
+    }
+
+
+        .deck{
+           width:10vh;
+        }
+        .draw{
+            width:10vh;
+        }
+        .deck-draw{
+
+            top:50%;
+        }
+        .hud-card-container{
+          padding:0px;
+        }
+        .hud-card{
+          width:4vh;
+        }
+        .hud-text{
+            font-weight: bold;
+            padding-top:-5px;
+            padding-bottom:-5px;
+        }
+        body{
+            background: rgb(29,167,7);
+            background: linear-gradient(180deg, rgba(29,167,7,1) 0%, rgba(45,121,9,1) 54%, rgba(0,74,0,1) 100%);
+            height:100%;
+        }
+        .container{
+        }
+html {
+    height: 100%;
+}
+body {
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+        .hud{
+            background-color:rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            padding-left:25px;
+            padding-right: 25px;
+            display:table;
+        }
+        .hud-text{
+            color: white;
+        }
+        .melds{
+            flex-wrap: nowrap;
+        }
+        .hand_cards{
+            flex-wrap: nowrap;
+        }
+        .player{
+
+            bottom: 10px;
+        }
+        .highlighted_cards{
+            border: 3px outset rgba(81, 203, 238, 1);
+            border-radius: 12%
+        }
+        .playingCard_container{
+            flex: 0 0 9.0%!important;
+            max-width: 9.0%!important;
+        }
+    </style>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/js/materialize.min.js"></script>
+<!--     <script src="https://code.jquery.com/mobile/git/jquery.mobile-git.js"></script> -->
+      <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+ <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+</head>
+<body>
+<!-- <p>you are online</p> -->
+
+<!-- <textarea id="chat" cols="80" rows="20"></textarea><br><br>
+        <input id="text" size="80" placeholder="Enter your message here"><br><br>
+<a href="#" onclick="leave_room();">Leave this room</a>
+
+
+
+<p>Room: </p><p id='room'></p>
+<button id='join_que_button' class="btn btn-success" >Find Game</button>
+<button id='leave_que_button' style="visibility:hidden;">cancel</button>
+<div id='que_message'></div>
+<h3>Players in Que</h3>
+<div id='que_list_container'></div>
+<h3>Game Data</h3>
+
+
+<div id='connect_users_container'></div>
+
+<button id='draw_card' onclick="draw_card()" type="submit" style="visibility:hidden;">Draw Card</button>
+<button id='draw_middle_card' onclick="draw_middle_card()" type="submit" style="visibility:hidden;">Draw Middle Card</button>
+</form>
+<p style="display: inline">Deck</p>
+<p style="display: inline"id='deck'></p>
+</br>
+<p style="display: inline">Middle Cards</p>
+<p style="display: inline"id='middle_cards'></p>
+</br>
+<p style="display: inline">player1 cards</p>
+<p style="display: inline"id='player1cards'></p>
+<div id='player1cards_buttons' class="sortable">
+</div>
+<div id='player1melds' ></div>
+</br>
+<p style="display: inline">player2 cards</p>
+<p style="display: inline"id='player2cards'></p>
+<div id='player2cards_buttons' class="sortable">
+</div>
+<div id='player2melds' ></div> -->
+
+
+<div class="container mt-5">
+<button id='join_que_button' class="btn btn-success" >Find Game</button>
+<button id='leave_que_button' class="btn btn-danger" style="visibility:hidden;">cancel</button>
+    <div class="row hand_cards" id='opponentHand'>
+    </div>
+    <div class="row mt-2 deck-draw">
+        <div class="col col-3 col-sm-3 col-md-3 col-lg-3" onclick="draw_card()" id='draw_card' style="visibility:hidden; text-align: right"><img class='deck' src="{{url_for('static',filename='cards/back.png')}}" alt=""></div>
+        <div class="col col-3 col-sm-3 col-md-3 col-lg-3" onclick="draw_middle_card()" id='middle_cards'></div>
+        <div class="col col-6 col-sm-6 col-md-6 col-lg-6" id='knock_scores' style="visibility: hidden">
+            <div class="row"><div class="col"><p style="font-weight: bold; color: white; font-size: 16px"><span id='who_knocked'></span> Knocked</p></div></div>
+            <div class="row"><div class="col" style="font-weight: bold; color: white; font-size: 18px"><p style="display:hidden">You <span id='win_or_lose'></span></p></div></div>
+            <div class="row"><div class="col"><p style="color: white; font-size: 14px">Your Points: +<span style="font-weight: bold;" id='player_points'></span></p></div></div>
+            <div class="row"><div class="col"><p style="color: white; font-size: 14px">Opponents Points: +<span style="font-weight: bold;" id='opponent_points'></span></p></div></div>
+            <div class="row"><div class="col"><button class="btn btn-success" id='next_game' onclick='next_game()' style="visibility: hidden">Next Game</button></div></div>
+        </div>
+    </div>
+    <div class="player">
+        <div class="row mt-3 hud-container">
+            <div class="col col-lg-auto col-md-auto col-xs-auto col-sm-auto hud mt-1">
+                <div class="row">
+                    <div class="col">
+                        <p class="hud-text">Melds</p>
+                    </div>
+                </div>
+                <div class="row melds">
+
+                </div>
+            </div>
+
+            <div class="col-sm-auto col-lg-auto col-md-auto col-xs-auto hud mt-1">
+                <div class="row" style="margin-bottom: -5px;">
+                    <div class="col " style="margin-bottom: -5px;">
+                        <p class="hud-text">Deadwood</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class='col col-lg-12 col-md-12 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'>
+                       <div class='row playercards_deadwood'style="margin-bottom: -5px;">
+                       </div>
+                    </div>
+                    <!-- <div class="col col-sm-auto hud-card-container"><img class='hud-card' src="{{url_for('static',filename='cards/QD.png')}}" alt=""></div> -->
+
+
+                </div>
+            </div>
+            <div class="col col-lg-1 col-md-1 col-sm-1 col-xs-1 justify-content-center align-items-center mt-1">
+                <button class="btn btn-warning" onclick="knock()" id='knock' >Knock</button>
+            </div>
+        </div>
+        <div class="row mt-2 mb-5 sortable hand_cards" id='playerHand'>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+
+        <script type="text/javascript" charset="utf-8">
+          $( function() {
+            $( ".sortable" ).sortable();
+            $( ".sortable" ).disableSelection();
+          } );
+            var socket;
+            var player1melds_list;
+            var player2melds_list;
+            // let player1_buttons = ""
+            // let player2_buttons = ""
+            $(document).ready(function(){
+                socket = io.connect('http://' + document.domain + ':' + location.port + '/online');
+                socket.on('connect', function() {
+                    socket.emit('joined', {});
+                });
+                socket.on('status', function(data) {
+                    // $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
+                    // $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                    // const queNode = document.getElementById('que_list_container');
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+                });
+                socket.on('message', function(data) {
+                    $('#chat').val($('#chat').val() + data.msg + '\n');
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+
+                socket.on('after_join_que', function(data){
+                    // const queNode = document.getElementById('que_list_container');
+                    // current_que = data.current_que
+                    // queNode.innerHTML = current_que
+                    socket.emit('connect_users',{});
+                });
+
+                socket.on('join_game', function(data){
+                    // socket.emit('game',{'data':'{{name}}'})
+                    // console.log('connect_users',data.connect_users);
+                    // window.location = data.url;
+                    // console.log('room',{{room}})
+                    // const room_name = document.getElementById('room');
+                    // room_name.innerHTML=data.room
+                    // console.log('game_id',data.game_id)
+                    socket.emit('get_game_data',{'game_id':data.game_id,'connect_users':data.connect_users})
+                });
+
+                socket.on('after_leave_que', function(data){
+                    // const queNode = document.getElementById('que_list_container')
+                    // current_que = data.current_que
+                    // queNode.innerHTML = current_que
+
+                });
+
+                socket.on('joined_game', function(data){
+                    document.getElementById('leave_que_button').style.visibility = "hidden";
+                    // var player1_buttons = ""
+                    // var player2_buttons = ""
+                    const deck = document.getElementById('deck');
+                    const player1cards = document.getElementById('player1cards');
+                    const player2cards = document.getElementById('player2cards');
+                    // const room_name = document.getElementById('room');
+                    const middle_cards = document.getElementById('middle_cards');
+                    // const player1melds = document.getElementById('player1melds');
+                    // const player2melds = document.getElementById('player2melds');
+                    // player1melds.innerHTML = data.player1melds
+                    console.log('player1melds',data.player1melds)
+                    console.log('player2melds',data.player2melds)
+                    // player2melds.innerHTML = data.player2melds
+                    // player1melds_list = data.player1melds
+                    // player2melds_list = data.player2melds
+                    if(data.middle_cards[data.middle_cards.length -1] !== undefined){
+                    var middle_card = Flask.url_for("static", {"filename": "cards/"+data.middle_cards[data.middle_cards.length -1]+".png"})
+                    middle_cards.innerHTML = "<img src="+middle_card+" class = 'draw' style='display:inline;'>";
+                    }
+                    // player1cards.innerHTML = data.player1cards;
+                    // player2cards.innerHTML = data.player2cards;
+                    // deck.innerHTML = data.deck;
+                    // room_name.innerHTML=data.room
+                    room_name = data.room
+                    const queNode = document.getElementById('que_list_container');
+
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+                    // var player1_buttons = ""
+                    // var player2_buttons = ""
+                    console.log('joined_game',data.deck)
+                    document.getElementById('draw_card').style.visibility = "visible";
+                    document.getElementById('middle_cards').style.visibility = "visible";
+
+                    document.getElementById('draw_card').style.visibility = "visible";
+
+
+                    var player_1_cards = data.player1cards
+                    console.log('player_1_cards', player_1_cards)
+                    // player_1_cards.forEach(player1_card_buttons);
+
+
+                    var player_2_cards = data.player2cards
+                    // player_2_cards.forEach(player2_card_buttons);
+                    var card_backs = Flask.url_for("static", {"filename": "cards/back.png"})
+                    if (data.player == 'player1'){
+                        // document.getElementById('player2melds').style.visibility = "hidden"
+                        this_player = 'player1'
+                        document.getElementById('opponentHand').classList.add('player2cards_buttons')
+                        document.getElementById('playerHand').classList.add('player1cards_buttons')
+                        document.getElementsByClassName('draw')[0].classList.add('highlighted_cards');
+                        document.getElementsByClassName('deck')[0].classList.add('highlighted_cards');
+                    }
+                    if (data.player == 'player2'){
+                        this_player = 'player2'
+                        document.getElementById('opponentHand').classList.add('player1cards_buttons')
+                        document.getElementById('playerHand').classList.add('player2cards_buttons')
+                    }
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    console.log(player2cards_buttons)
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+                    console.log(player1cards_buttons)
+                    player_1_cards.forEach(player1_card_buttons);
+                    player_2_cards.forEach(player2_card_buttons);
+                    var player1_buttons =''
+                    var player2_buttons =''
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 ui-state-default pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons
+                        console.log(player1_buttons)
+                        console.log(typeof player1cards_buttons.innerHTML)
+                        player1cards_buttons.innerHTML.replace('undefined','')
+                    }
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 ui-state-default pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons
+                        console.log(player2_buttons);
+                        console.log(player2cards_buttons.innerHTML)
+                        player2cards_buttons.innerHTML.replace('undefined','')
+                    }
+                    player1cards_buttons.innerHTML.replace('undefined','')
+                    player2cards_buttons.innerHTML.replace('undefined','')
+                    const playercards_deadwood = document.getElementsByClassName('playercards_deadwood')[0];
+                    var player_1_cards_deadwood = data.player1melds.deadwood
+                    var player_2_cards_deadwood = data.player2melds.deadwood
+
+                    function player_deadwood_cards(value,index,array){
+                        var player_deadwood =''
+                        console.log(player_deadwood);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player_deadwood = player_deadwood + "<div class='col col-sm-1 col-md-1 col-lg-1 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+card_image+" alt=''></div></div>";
+                        playercards_deadwood.innerHTML += player_deadwood
+                        playercards_deadwood.innerHTML.replace('undefined','')
+                    }
+
+                    if (this_player=='player1'){
+                        document.getElementsByClassName('player2cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 ui-state-default playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        console.log('melds',data.player1melds.meld1)
+                        console.log('melds',data.player1melds)
+                        player_1_cards_deadwood.forEach(player_deadwood_cards);
+                        if(data.player1melds.meld1 !== undefined){
+                            if(data.player1melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld2 !== undefined){
+                            if(data.player1melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld3 !== undefined){
+                            if(data.player1melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                            }
+
+
+                        }
+                        $('.player2card').attr('disabled','disabled');
+                        $('#middle_cards').attr('onclick','draw_middle_card()')
+                        $('#draw_card').attr('onclick','draw_card()')
+                    }
+
+                    if (this_player=='player2'){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('player1cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 ui-state-default playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        $('#middle_cards').removeAttr('onclick')
+                        $('#draw_card').removeAttr('onclick')
+                        player_2_cards_deadwood.forEach(player_deadwood_cards);
+                        if(data.player2melds.meld1 !== undefined){
+                            if(data.player2melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                            }
+                            if(data.player2melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                            }
+                        }
+                    if(data.player2melds.meld2 !== undefined){
+                        if(data.player2melds.meld2.length == 3){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                        }
+                        if(data.player2melds.meld2.length == 4){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                            meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[3]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                        }
+                    }
+                    if(data.player2melds.meld3 !== undefined){
+                        if(data.player2melds.meld3.length == 3){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                        }
+                        if(data.player2melds.meld3.length == 4){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                            meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[3]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                        }
+                    }
+                }
+                    $('.player1card').removeAttr('onclick');
+                    $('.player2card').removeAttr('onclick');
+                    console.log('game joined')
+                });
+
+            // function player1_card_buttons(value,index,array){
+            //     console.log(player1_buttons);
+            //     let player1_buttons = player1_buttons + "<button class = 'player1card' onclick='discard(event)' id='" +value+"'>"+value+"</button>";
+            //     console.log(player1_buttons)
+            // }
+
+
+            // function player2_card_buttons(value,index,array){
+            //     console.log(player2_buttons);
+            //     let player2_buttons = player2_buttons + "<button class='player2card' onclick='discard(event)' id='" +value+"'>"+value+"</button>";
+            //     console.log(player2_buttons);
+            // }
+
+
+                socket.on('card_drawn', function(data){
+                    console.log('drawing card')
+
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+
+                    const deck = document.getElementById('deck');
+                    const player1cards = document.getElementById('player1cards');
+                    const player2cards = document.getElementById('player2cards');
+                    // const room_name = document.getElementById('room');
+                    const middle_cards = document.getElementById('middle_cards');
+                    // const player1melds = document.getElementById('player1melds');
+                    // const player2melds = document.getElementById('player2melds');
+                    // player1melds.innerHTML = data.player1melds
+                    // player2melds.innerHTML = data.player2melds
+                    // player1melds_list = data.player1melds
+                    // player2melds_list = data.player2melds
+                    if(data.middle_cards[data.middle_cards.length -1] !== undefined){
+                        var middle_card = Flask.url_for("static", {"filename": "cards/"+data.middle_cards[data.middle_cards.length -1]+".png"})
+                        middle_cards.innerHTML = "<img src="+middle_card+" class = 'draw ui-state-default' style='display:inline;'>";
+                        }
+                    // player1cards.innerHTML = data.player1cards;
+                    // player2cards.innerHTML = data.player2cards;
+                    // deck.innerHTML = data.deck;
+                    // room_name.innerHTML=data.room
+                    // const queNode = document.getElementById('que_list_container');
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+                    if (document.getElementsByClassName('draw')[0]!== undefined){
+                        document.getElementsByClassName('draw')[0].classList.remove('highlighted_cards');
+                        }
+                    document.getElementsByClassName('deck')[0].classList.remove('highlighted_cards');
+
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+                    var player_1_cards = data.player1cards
+
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    var player1_buttons ='';
+                    var player2_buttons ='';
+                    player1cards_buttons.innerHTML ='';
+                    player2cards_buttons.innerHTML = '';
+                    player_1_cards.forEach(player1_card_buttons);
+
+
+                    var player_2_cards = data.player2cards
+
+                    player_2_cards.forEach(player2_card_buttons);
+
+                    var card_backs = Flask.url_for("static", {"filename": "cards/back.png"})
+
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons;
+                        console.log(player1_buttons);
+                        }
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons;
+                        console.log(player2_buttons);
+                        }
+                    if (this_player!==data.player){
+                        $('.player1card').removeAttr('onclick');
+                        $('.player2card').removeAttr('onclick');
+
+                        }
+                    if (this_player==data.player){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        $('#middle_cards').removeAttr('onclick')
+                        $('#draw_card').removeAttr('onclick')
+                        if (this_player == 'player1'){
+                            $('.player1card').attr('onclick','discard(event)');
+                            $('.player1card').addClass('highlighted_cards');
+                            }
+                        if (this_player == 'player2'){
+                            $('.player2card').attr('onclick','discard(event)');
+                            $('.player2card').addClass('highlighted_cards');
+                            }
+                        }
+                    if (this_player=='player1'){
+                        document.getElementsByClassName('player2cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        // document.getElementById('draw_middle_card').style.visibility = "visible";
+                        // $('.player2card').attr('disabled','disabled');
+                        // $('#middle_cards').attr('onclick','draw_middle_card()')
+                        if(data.player1melds.meld1 !== undefined){
+                            if(data.player1melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld2 !== undefined){
+                            if(data.player1melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld3 !== undefined){
+                            if(data.player1melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        }
+                    if (this_player=='player2'){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('player1cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        if(data.player2melds.meld1 !== undefined){
+                            if(data.player2melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld2 !== undefined){
+                            if(data.player2melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld3 !== undefined){
+                            if(data.player2melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        }
+                    console.log('card_drawn')
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+                    // socket.emit('/game/<id>',{'id':data.id})
+                });
+
+
+
+                socket.on('drawn_middle_card', function(data){
+                    console.log('drawing card')
+
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+
+                    const deck = document.getElementById('deck');
+                    const player1cards = document.getElementById('player1cards');
+                    const player2cards = document.getElementById('player2cards');
+                    // const room_name = document.getElementById('room');
+                    const middle_cards = document.getElementById('middle_cards');
+                    // const player1melds = document.getElementById('player1melds');
+                    // const player2melds = document.getElementById('player2melds');
+                    // player1melds.innerHTML = data.player1melds
+                    // player2melds.innerHTML = data.player2melds
+                    // player1melds_list = data.player1melds
+                    // player2melds_list = data.player2melds
+                    if(data.middle_cards[data.middle_cards.length -1] !== undefined){
+                    var middle_card = Flask.url_for("static", {"filename": "cards/"+data.middle_cards[data.middle_cards.length -1]+".png"})
+                    middle_cards.innerHTML = "<img src="+middle_card+" class = 'draw ui-state-default' style='display:inline;'>";
+                    }
+                    if(data.middle_cards[data.middle_cards.length -1] == undefined){
+                    middle_cards.innerHTML = "";
+                    }
+                    // player1cards.innerHTML = data.player1cards;
+                    // player2cards.innerHTML = data.player2cards;
+                    // deck.innerHTML = data.deck;
+                    // room_name.innerHTML=data.room
+                    // const queNode = document.getElementById('que_list_container');
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+                    var player_1_cards = data.player1cards
+                    var card_backs = Flask.url_for("static", {"filename": "cards/back.png"})
+                    // console.log('card_drawn');
+                    // console.log(player1_card_buttons);
+                    // console.log(player2_card_buttons);
+                    // console.log('player_1_cards', player_1_cards);
+                    // console.log('player_2_cards', player_2_cards);
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    var player1_buttons ='';
+                    var player2_buttons ='';
+                    player1cards_buttons.innerHTML ='';
+                    player2cards_buttons.innerHTML = '';
+                    player_1_cards.forEach(player1_card_buttons);
+
+
+                    var player_2_cards = data.player2cards
+
+                    player_2_cards.forEach(player2_card_buttons);
+                    if (document.getElementsByClassName('draw')[0]!== undefined){
+                        document.getElementsByClassName('draw')[0].classList.remove('highlighted_cards');
+                        }
+                    document.getElementsByClassName('deck')[0].classList.remove('highlighted_cards');
+
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons;
+                        console.log(player1_buttons);
+                    }
+
+
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons;
+                        console.log(player2_buttons);
+                    }
+                    if (this_player!==data.player){
+                        $('.player1card').removeAttr('onclick');
+                        $('.player2card').removeAttr('onclick');
+                    }
+                    if (this_player==data.player){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        $('#middle_cards').removeAttr('onclick')
+                        $('#draw_card').removeAttr('onclick')
+                        if (this_player == 'player1'){
+                            $('.player1card').addClass('highlighted_cards');
+                            $('.player1card').attr('onclick','discard(event)');
+                        }
+                        if (this_player == 'player2'){
+                            $('.player2card').addClass('highlighted_cards');
+                            $('.player2card').attr('onclick','discard(event)');
+                        }
+                    }
+                    if (this_player=='player1'){
+                        document.getElementsByClassName('player2cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "visible";
+                        // $('.player2card').attr('disabled','disabled');
+                        // $('#middle_cards').attr('onclick','draw_middle_card()')
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        if(data.player1melds.meld1 !== undefined){
+                            if(data.player1melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld2 !== undefined){
+                            if(data.player1melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld3 !== undefined){
+                            if(data.player1melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                    }
+                    if (this_player=='player2'){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('player1cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        if(data.player2melds.meld1 !== undefined){
+                            if(data.player2melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld2 !== undefined){
+                            if(data.player2melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld3 !== undefined){
+                            if(data.player2melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                    }
+                    console.log('card_drawn')
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+                    // socket.emit('/game/<id>',{'id':data.id})
+                });
+
+
+                socket.on('card_discarded', function(data){
+                    console.log('drawing card')
+
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+                    const deck = document.getElementById('deck');
+                    const player1cards = document.getElementById('player1cards');
+                    const player2cards = document.getElementById('player2cards');
+                    // const room_name = document.getElementById('room');
+                    const middle_cards = document.getElementById('middle_cards');
+                    // const player1melds = document.getElementById('player1melds');
+                    // const player2melds = document.getElementById('player2melds');
+                    // player1melds.innerHTML = data.player1melds
+                    // player2melds.innerHTML = data.player2melds
+                    // player1melds_list = data.player1melds
+                    // player2melds_list = data.player2melds
+                    if(data.middle_cards[data.middle_cards.length -1] !== undefined){
+                    var middle_card = Flask.url_for("static", {"filename": "cards/"+data.middle_cards[data.middle_cards.length -1]+".png"})
+                    middle_cards.innerHTML = "<img src="+middle_card+" class = 'draw ui-state-default' style='display:inline;'>";
+                    }
+                    // player1cards.innerHTML = data.player1cards;
+                    // player2cards.innerHTML = data.player2cards;
+                    // deck.innerHTML = data.deck;
+                    // room_name.innerHTML=data.room
+                    // const queNode = document.getElementById('que_list_container');
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+
+                    document.getElementById('draw_card').style.visibility = "visible";
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+                    var player_1_cards = data.player1cards
+                    // console.log('card_drawn');
+                    // console.log(player1_card_buttons);
+                    // console.log(player2_card_buttons);
+                    // console.log('player_1_cards', player_1_cards);
+                    // console.log('player_2_cards', player_2_cards);
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    var player1_buttons ='';
+                    var player2_buttons ='';
+                    player1cards_buttons.innerHTML ='';
+                    player2cards_buttons.innerHTML = '';
+                    player_1_cards.forEach(player1_card_buttons);
+                    var card_backs = Flask.url_for("static", {"filename": "cards/back.png"})
+
+                    var player_2_cards = data.player2cards
+
+                    player_2_cards.forEach(player2_card_buttons);
+
+
+
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons;
+                        console.log(player1_buttons);
+                    }
+
+
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons;
+                        console.log(player2_buttons);
+                    }
+                    if (this_player!==data.player){
+                        $('.player2card').removeAttr('onclick');
+                        $('.player1card').removeAttr('onclick');
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "visible";
+                        $('#middle_cards').attr('onclick','draw_middle_card()')
+                        $('#draw_card').attr('onclick','draw_card()')
+                        document.getElementsByClassName('draw')[0].classList.add('highlighted_cards');
+                        document.getElementsByClassName('deck')[0].classList.add('highlighted_cards');
+                    }
+                    if (this_player==data.player){
+                        $('.player2card').removeAttr('onclick');
+                        $('.player1card').removeAttr('onclick');
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        $('#middle_cards').removeAttr('onclick')
+                        $('#draw_card').removeAttr('onclick')
+                        if(this_player == 'player1'){
+                            $('.player1card').removeClass('highlighted_cards');
+                        }
+                        if(this_player == 'player2'){
+                            $('.player2card').removeClass('highlighted_cards');
+                        }
+                    }
+                    if (this_player=='player1'){
+                        document.getElementsByClassName('player2cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        // document.getElementById('draw_middle_card').style.visibility = "visible";
+                        // $('.player2card').attr('disabled','disabled');
+                        // $('#middle_cards').attr('onclick','draw_middle_card()')
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        if(data.player1melds.meld1 !== undefined){
+                            if(data.player1melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML ="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld2 !== undefined){
+                            if(data.player1melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld3 !== undefined){
+                            if(data.player1melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                    }
+                    if (this_player=='player2'){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('player1cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        // document.getElementById('draw_middle_card').style.visibility = "hidden";
+                        document.getElementsByClassName('melds')[0].innerHTML =''
+                        if(data.player2melds.meld1 !== undefined){
+                            if(data.player2melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld2 !== undefined){
+                            if(data.player2melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player2melds.meld3 !== undefined){
+                            if(data.player2melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player2melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                    }
+                    console.log('card_drawn')
+                    console.log(player1_buttons)
+                    console.log(player2_buttons)
+                    console.log('this_player',this_player)
+                })
+
+
+
+                socket.on('redeal_cards', function(data){
+                    document.getElementById('knock_scores').style.visibility='hidden'
+                    document.getElementById('next_game').style.visibility='hidden'
+                    document.getElementsByClassName('melds')[0].innerHTML =''
+                    // var player1_buttons = ""
+                    // var player2_buttons = ""
+                    const deck = document.getElementById('deck');
+                    const player1cards = document.getElementById('player1cards');
+                    const player2cards = document.getElementById('player2cards');
+                    // const room_name = document.getElementById('room');
+                    const middle_cards = document.getElementById('middle_cards');
+                    // const player1melds = document.getElementById('player1melds');
+                    // const player2melds = document.getElementById('player2melds');
+                    // player1melds.innerHTML = data.player1melds
+                    console.log('player1melds',data.player1melds)
+                    console.log('player2melds',data.player2melds)
+                    // player2melds.innerHTML = data.player2melds
+                    // player1melds_list = data.player1melds
+                    // player2melds_list = data.player2melds
+                    if(data.middle_cards[data.middle_cards.length -1] !== undefined){
+                    var middle_card = Flask.url_for("static", {"filename": "cards/"+data.middle_cards[data.middle_cards.length -1]+".png"})
+                    middle_cards.innerHTML = "<img src="+middle_card+" class = 'draw' style='display:inline;'>";
+                    }
+                    // player1cards.innerHTML = data.player1cards;
+                    // player2cards.innerHTML = data.player2cards;
+                    // deck.innerHTML = data.deck;
+                    // room_name.innerHTML=data.room
+                    room_name = data.room
+                    const queNode = document.getElementById('que_list_container');
+
+                    // current_que = data.current_que
+                    // queNode.innerHTML = data.current_que
+                    // var player1_buttons = ""
+                    // var player2_buttons = ""
+                    console.log('joined_game',data.deck)
+                    document.getElementById('draw_card').style.visibility = "visible";
+                    document.getElementById('middle_cards').style.visibility = "visible";
+
+                    document.getElementById('draw_card').style.visibility = "visible";
+
+
+                    var player_1_cards = data.player1cards
+                    console.log('player_1_cards', player_1_cards)
+                    // player_1_cards.forEach(player1_card_buttons);
+
+
+                    var player_2_cards = data.player2cards
+                    // player_2_cards.forEach(player2_card_buttons);
+                    var card_backs = Flask.url_for("static", {"filename": "cards/back.png"})
+                    if (data.player == 'player1'){
+                        // document.getElementById('player2melds').style.visibility = "hidden"
+                        this_player = 'player1'
+                        document.getElementById('opponentHand').classList.add('player2cards_buttons')
+                        document.getElementById('playerHand').classList.add('player1cards_buttons')
+                        document.getElementsByClassName('draw')[0].classList.add('highlighted_cards');
+                        document.getElementsByClassName('deck')[0].classList.add('highlighted_cards');
+                    }
+                    if (data.player == 'player2'){
+                        this_player = 'player2'
+                        document.getElementById('opponentHand').classList.add('player1cards_buttons')
+                        document.getElementById('playerHand').classList.add('player2cards_buttons')
+                    }
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    console.log(player2cards_buttons)
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+                    console.log(player1cards_buttons)
+                    player1cards_buttons.innerHTML ='';
+                    player2cards_buttons.innerHTML = '';
+                    player_1_cards.forEach(player1_card_buttons);
+                    player_2_cards.forEach(player2_card_buttons);
+                    var player1_buttons =''
+                    var player2_buttons =''
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 ui-state-default pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons
+                        console.log(player1_buttons)
+                        console.log(typeof player1cards_buttons.innerHTML)
+                        player1cards_buttons.innerHTML.replace('undefined','')
+                    }
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 ui-state-default pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons
+                        console.log(player2_buttons);
+                        console.log(player2cards_buttons.innerHTML)
+                        player2cards_buttons.innerHTML.replace('undefined','')
+                    }
+                    player1cards_buttons.innerHTML.replace('undefined','')
+                    player2cards_buttons.innerHTML.replace('undefined','')
+
+                    if (this_player=='player1'){
+                        document.getElementsByClassName('player2cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 ui-state-default playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0  playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        console.log('melds',data.player1melds.meld1)
+                        console.log('melds',data.player1melds)
+                        if(data.player1melds.meld1 !== undefined){
+                            if(data.player1melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld2 !== undefined){
+                            if(data.player1melds.meld2.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld2.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld2[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                                }
+                            }
+                        if(data.player1melds.meld3 !== undefined){
+                            if(data.player1melds.meld3.length == 3){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                                }
+                            if(data.player1melds.meld3.length == 4){
+                                meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[0]+".png"})
+                                meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[1]+".png"})
+                                meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[2]+".png"})
+                                meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player1melds.meld3[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                            }
+                        }
+                        $('.player2card').attr('disabled','disabled');
+                        $('#middle_cards').attr('onclick','draw_middle_card()')
+                        $('#draw_card').attr('onclick','draw_card()')
+                    }
+
+                    if (this_player=='player2'){
+                        document.getElementById('draw_card').style.visibility = "visible";
+                        document.getElementsByClassName('player1cards_buttons')[0].innerHTML = "<div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 ui-state-default playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div><div class='col col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_containerg'><img class='playingCard' src="+card_backs+" alt=''></div>"
+                        $('#middle_cards').removeAttr('onclick')
+                        $('#draw_card').removeAttr('onclick')
+                        if(data.player2melds.meld1 !== undefined){
+                            if(data.player2melds.meld1.length == 3){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                            }
+                            if(data.player2melds.meld1.length == 4){
+                                var meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[0]+".png"})
+                                var meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[1]+".png"})
+                                var meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[2]+".png"})
+                                var meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld1[3]+".png"})
+                                document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                            }
+                        }
+                    if(data.player2melds.meld2 !== undefined){
+                        if(data.player2melds.meld2.length == 3){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                        }
+                        if(data.player2melds.meld2.length == 4){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[2]+".png"})
+                            meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld2[3]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                        }
+                    }
+                    if(data.player2melds.meld3 !== undefined){
+                        if(data.player2melds.meld3.length == 3){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML +="<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div></div></div>"
+                        }
+                        if(data.player2melds.meld3.length == 4){
+                            meld1_card1 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[0]+".png"})
+                            meld1_card2 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[1]+".png"})
+                            meld1_card3 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[2]+".png"})
+                            meld1_card4 = Flask.url_for("static", {"filename": "cards/"+data.player2melds.meld3[3]+".png"})
+                            document.getElementsByClassName('melds')[0].innerHTML += "<div class='col col-lg-4 col-md-4 col-sm-12 col-xs-12' style='margin-right:4px;margin-left: 4px'><div class='row'><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card1+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card2+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card3+" alt=''></div><div class='col col-sm-1 col-md-3 col-lg-3 col-xs-1 hud-card-container' style=''><img class='hud-card' src="+meld1_card4+" alt=''></div></div></div>"
+                        }
+                    }
+                }
+                    $('.player1card').removeAttr('onclick');
+                    $('.player2card').removeAttr('onclick');
+                    console.log('game joined')
+                });
+
+
+
+                socket.on('knocked', function(data){
+                    document.getElementById('knock_scores').style.visibility = "visible";
+                    if (data.player == this_player){
+                        knocker = 'You'
+                        player_points = data.knocker_points
+                        opponent_points = data.opponent_points
+                        if(player_points>opponent_points){
+                            win_or_lose = 'Win'
+                        }
+                        if(player_points<opponent_points){
+                            win_or_lose ='Lose'
+                        }
+                        document.getElementById('next_game').style.visibility = "visible";
+                    }
+                    if (data.player!== this_player){
+                        knocker = 'Opponent'
+                        player_points = data.opponent_points
+                        opponent_points = data.knocker_points
+                        if(player_points>opponent_points){
+                            win_or_lose = 'Win'
+                        }
+                        if(player_points<opponent_points){
+                            win_or_lose ='Lose'
+                        }
+                    }
+                    document.getElementById('who_knocked').innerHTML = knocker;
+                    document.getElementById('win_or_lose').innerHTML = win_or_lose;
+                    document.getElementById('player_points').innerHTML = player_points;
+                    document.getElementById('opponent_points').innerHTML = opponent_points;
+                    document.getElementById('opponent_points')
+
+                    const player1cards_buttons = document.getElementsByClassName('player1cards_buttons')[0];
+
+                    const player2cards_buttons = document.getElementsByClassName('player2cards_buttons')[0];
+                    player1cards_buttons.innerHTML ='';
+                    player2cards_buttons.innerHTML = '';
+                    var player_1_cards = data.player1cards
+                    player_1_cards.forEach(player1_card_buttons);
+                    var player_2_cards = data.player2cards
+                    player_2_cards.forEach(player2_card_buttons);
+
+                    function player1_card_buttons(value,index,array){
+                        var player1_buttons =''
+                        console.log(player1_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player1_buttons = player1_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player1card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player1cards_buttons.innerHTML += player1_buttons;
+                        console.log(player1_buttons);
+                    }
+
+
+                    function player2_card_buttons(value,index,array){
+                        var player2_buttons =''
+                        console.log(player2_buttons);
+                        var card_image = Flask.url_for("static", {"filename": "cards/"+value+".png"})
+                        var player2_buttons = player2_buttons + "<div class='col-lg-1 col-md-1 col-sm-1 col-xs-1 pr-0 pl-0 playingCard_container'><img src="+card_image+" class = 'player2card ui-state-default playingCard' style='display:inline;' id='" +value+"'></div>";
+                        player2cards_buttons.innerHTML += player2_buttons;
+                        console.log(player2_buttons);
+                    }
+                })
+                window.addEventListener("beforeunload", function () {
+                        socket.emit('left', {
+                        })
+                    });
+
+
+                $('#text').keypress(function(e) {
+                    var code = e.keyCode || e.which;
+                    if (code == 13) {
+                        text = $('#text').val();
+                        $('#text').val('');
+                        socket.emit('text', {msg: text});
+                    }
+                });
+            });
+
+            //I want to make it so when user clicks the button above that
+            // they are redirected to the que room
+            //once in cue room function connect users figures out how to connect
+            // both users to /new_game, then redirects them to game ID
+            $("#join_que_button").click(function(e){
+                e.preventDefault();
+                // const newNode = document.getElementById('que_message');
+                // newNode.innerHTML = 'you have joined the que';
+                document.getElementById('join_que_button').style.visibility = "hidden";
+                document.getElementById('leave_que_button').style.visibility = "visible";
+                socket.emit('join_que', {});
+            });
+            $("#leave_que_button").click(function(e){
+                e.preventDefault();
+                // const newNode = document.getElementById('que_message');
+                // newNode.innerHTML = 'you have left the que';
+                socket.emit('leave_que', {});
+                document.getElementById('join_que_button').style.visibility = "visible";
+                document.getElementById('leave_que_button').style.visibility = "hidden";
+            });
+            // $("#draw_card").click(function(){
+            //     // e.preventDefault();
+            //     socket.emit('draw_card', {});
+            // });
+
+            function draw_card() {
+                if (this_player == 'player1'){
+                    var current_hand = []
+                    $('.player1card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                if (this_player == 'player2'){
+                    var current_hand = []
+                    $('.player2card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                socket.emit('draw_card',{'current_hand':current_hand})
+            }
+
+            function draw_middle_card() {
+                if (this_player == 'player1'){
+                    var current_hand = []
+                    $('.player1card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                if (this_player == 'player2'){
+                    var current_hand = []
+                    $('.player2card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                socket.emit('draw_middle_card',{'current_hand':current_hand})
+            }
+            function knock() {
+                if (this_player == 'player1'){
+                    var current_hand = []
+                    $('.player1card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log('current_hand',current_hand)
+                    socket.emit('knock',{'current_hand':current_hand})
+                    console.log('current_hand',current_hand)
+                }
+                if (this_player == 'player2'){
+                    var current_hand = []
+                    $('.player2card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log('current_hand',current_hand)
+                    socket.emit('knock',{'current_hand':current_hand})
+                    console.log('current_hand',current_hand)
+                }
+
+            }
+            function next_game() {
+
+                socket.emit('redeal',{})
+            }
+
+
+            function connect_users() {
+                socket.emit('connect_users', {});
+            }
+            function leave_room() {
+                socket.emit('left', {}, function() {
+                    socket.disconnect();
+
+                    // go back to the login page
+                    window.location.href = "{{ url_for('accounts.login') }}";
+                });
+            }
+
+            function discard(e){
+                if (this_player == 'player1'){
+                    var current_hand = []
+                    $('.player1card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                if (this_player == 'player2'){
+                    var current_hand = []
+                    $('.player2card').each(function(){
+                        current_hand.push($(this).attr("id"))
+                    })
+                    console.log(current_hand)
+                }
+                // var player1_buttons = ''
+                // var player2_buttons = ''
+                // document.getElementsByClassName('player1cards_buttons')[0].innerHTML=''
+                // document.getElementsByClassName('player2cards_buttons')[0].innerHTML=''
+                var card = e.target.id
+
+                socket.emit('discard',{'card':card,'current_hand':current_hand})
+            }
+            // $("#draw_card_form").submit(function(e) {
+            //     e.preventDefault();
+            // });
+(function( $ ) {
+
+    $.support.touch = typeof Touch === 'object';
+
+    if (!$.support.touch) {
+        return;
+    }
+
+    var proto =  $.ui.mouse.prototype,
+    _mouseInit = proto._mouseInit;
+
+    $.extend( proto, {
+        _mouseInit: function() {
+            this.element
+            .bind( "touchstart." + this.widgetName, $.proxy( this, "_touchStart" ) );
+            _mouseInit.apply( this, arguments );
+        },
+
+        _touchStart: function( event ) {
+            if ( event.originalEvent.targetTouches.length != 1 ) {
+                return false;
+            }
+
+            this.element
+            .bind( "touchmove." + this.widgetName, $.proxy( this, "_touchMove" ) )
+            .bind( "touchend." + this.widgetName, $.proxy( this, "_touchEnd" ) );
+
+            this._modifyEvent( event );
+
+            $( document ).trigger($.Event("mouseup")); //reset mouseHandled flag in ui.mouse
+            this._mouseDown( event );
+
+            return false;
+        },
+
+        _touchMove: function( event ) {
+            this._modifyEvent( event );
+            this._mouseMove( event );
+        },
+
+        _touchEnd: function( event ) {
+            this.element
+            .unbind( "touchmove." + this.widgetName )
+            .unbind( "touchend." + this.widgetName );
+            this._mouseUp( event );
+        },
+
+        _modifyEvent: function( event ) {
+            event.which = 1;
+            var target = event.originalEvent.targetTouches[0];
+            event.pageX = target.clientX;
+            event.pageY = target.clientY;
+        }
+
+    });
+
+})( jQuery );
+        </script>
+</html>

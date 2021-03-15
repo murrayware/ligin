@@ -5,16 +5,14 @@ from flask import Blueprint,request,render_template,redirect,flash,url_for,curre
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
-from application import app
 from dotenv import load_dotenv
 from sqlalchemy import or_
 import re
 load_dotenv()
 from ..forms import *
+from . import accounts
 
 
-
-accounts = Blueprint('accounts',__name__,template_folder='templates', url_prefix='/accounts')
 
 bcrypt = Bcrypt()
 mail = Mail()
@@ -25,13 +23,15 @@ app_root = Path(__file__).parents[1]
 @accounts.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('main.online'))
     if request.method == "POST":
         email = request.form["email"]
+        username = request.form["username"]
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         form = RegistrationForm(
             email=email,
+            username=username,
             password=password,
             confirm_password=confirm_password,
         )
@@ -40,15 +40,17 @@ def register():
                 hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
                 user = User(
                     email=form.email.data,
+                    username=form.username.data,
                     password=hashed_password,)
 
                 db.session.add(user)
                 db.session.commit()
                 login_user(user)
-                return redirect(url_for('main.home'))
+                return redirect(url_for('main.online'))
     else:
         form = RegistrationForm(
             email="",
+            username="",
             password="",
             confirm_password="",
         )
@@ -57,7 +59,7 @@ def register():
 @accounts.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for('main.online'))
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
